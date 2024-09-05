@@ -1,6 +1,6 @@
 import torch
 import torch.nn as nn
-from mmcv import is_tuple_of
+from mmengine.utils.misc import is_tuple_of
 from mmcv.cnn import ConvModule
 
 from mmseg.ops import resize

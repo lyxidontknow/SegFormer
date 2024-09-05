@@ -1,13 +1,52 @@
 import torch.nn as nn
 import torch.utils.checkpoint as cp
-from mmcv.cnn import (build_conv_layer, build_norm_layer, build_plugin_layer,
-                      constant_init, kaiming_init)
-from mmcv.runner import load_checkpoint
-from mmcv.utils.parrots_wrapper import _BatchNorm
+from mmcv.cnn import (build_conv_layer, build_norm_layer, build_plugin_layer)
+from mmengine.runner.checkpoint import load_checkpoint
+from mmengine.model.utils import _BatchNormXd
 
 from mmseg.utils import get_root_logger
 from ..builder import BACKBONES
 from ..utils import ResLayer
+
+
+def constant_init(module, val, bias=0):
+    """Initialize the weight of module with constant values.
+
+    Args:
+        module (nn.Module): The module to be initialized.
+        val (float): The value to fill the weight.
+        bias (float, optional): The value to fill the bias. Default: 0.
+    """
+    nn.init.constant_(module.weight, val)
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)
+
+
+def kaiming_init(module, mode='fan_out', nonlinearity='relu', bias=0, distribution='normal'):
+    """Initialize module parameters with Kaiming initialization.
+
+    Args:
+        module (nn.Module): Module to be initialized.
+        mode (str): Either 'fan_in' or 'fan_out'. Choosing 'fan_in' preserves the magnitude
+            of the variance of the weights in the forward pass. 'fan_out' preserves the
+            magnitudes in the backwards pass. Default: 'fan_out'.
+        nonlinearity (str): The non-linear function, recommended to use 'relu' or variants.
+            Default: 'relu'.
+        bias (float, optional): The value to initialize the bias. Default: 0.
+        distribution (str): The random distribution to use. Can be 'normal' or 'uniform'.
+            Default: 'normal'.
+    """
+    assert distribution in ['uniform', 'normal'], \
+        "Invalid distribution for kaiming initialization"
+
+    if distribution == 'uniform':
+        nn.init.kaiming_uniform_(module.weight, a=0, mode=mode, nonlinearity=nonlinearity)
+    else:
+        nn.init.kaiming_normal_(module.weight, a=0, mode=mode, nonlinearity=nonlinearity)
+
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)
+
 
 
 class BasicBlock(nn.Module):
@@ -611,7 +650,7 @@ class ResNet(nn.Module):
             for m in self.modules():
                 if isinstance(m, nn.Conv2d):
                     kaiming_init(m)
-                elif isinstance(m, (_BatchNorm, nn.GroupNorm)):
+                elif isinstance(m, (_BatchNormXd, nn.GroupNorm)):
                     constant_init(m, 1)
 
             if self.dcn is not None:
@@ -654,7 +693,7 @@ class ResNet(nn.Module):
         if mode and self.norm_eval:
             for m in self.modules():
                 # trick: eval have effect on BatchNorm only
-                if isinstance(m, _BatchNorm):
+                if isinstance(m, _BatchNormXd):
                     m.eval()
 
 

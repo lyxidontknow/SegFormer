@@ -3,7 +3,7 @@ import tempfile
 
 import mmcv
 import numpy as np
-from mmcv.utils import print_log
+from utils.logging import print_log
 from PIL import Image
 
 from .builder import DATASETS

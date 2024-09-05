@@ -2,13 +2,27 @@
 
 import torch
 import torch.nn as nn
-from mmcv.cnn import ConvModule, normal_init
+from mmcv.cnn import ConvModule
 from mmcv.ops import point_sample
 
 from mmseg.models.builder import HEADS
 from mmseg.ops import resize
 from ..losses import accuracy
 from .cascade_decode_head import BaseCascadeDecodeHead
+
+
+def normal_init(module, mean=0, std=1, bias=0):
+    """Initialize the weight and bias of module with values drawn from a normal distribution.
+
+    Args:
+        module (nn.Module): The module to be initialized.
+        mean (float): Mean of the normal distribution. Default: 0.
+        std (float): Standard deviation of the normal distribution. Default: 1.
+        bias (float, optional): The value to initialize the bias. Default: 0.
+    """
+    nn.init.normal_(module.weight, mean, std)
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)
 
 
 def calculate_uncertainty(seg_logits):

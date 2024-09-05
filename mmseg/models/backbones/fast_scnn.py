@@ -1,13 +1,51 @@
 import torch
 import torch.nn as nn
-from mmcv.cnn import (ConvModule, DepthwiseSeparableConvModule, constant_init,
-                      kaiming_init)
+from mmcv.cnn import (ConvModule, DepthwiseSeparableConvModule)
 from torch.nn.modules.batchnorm import _BatchNorm
 
 from mmseg.models.decode_heads.psp_head import PPM
 from mmseg.ops import resize
 from ..builder import BACKBONES
 from ..utils.inverted_residual import InvertedResidual
+
+
+def constant_init(module, val, bias=0):
+    """Initialize the weight of module with constant values.
+
+    Args:
+        module (nn.Module): The module to be initialized.
+        val (float): The value to fill the weight.
+        bias (float, optional): The value to fill the bias. Default: 0.
+    """
+    nn.init.constant_(module.weight, val)
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)
+
+
+def kaiming_init(module, mode='fan_out', nonlinearity='relu', bias=0, distribution='normal'):
+    """Initialize module parameters with Kaiming initialization.
+
+    Args:
+        module (nn.Module): Module to be initialized.
+        mode (str): Either 'fan_in' or 'fan_out'. Choosing 'fan_in' preserves the magnitude
+            of the variance of the weights in the forward pass. 'fan_out' preserves the
+            magnitudes in the backwards pass. Default: 'fan_out'.
+        nonlinearity (str): The non-linear function, recommended to use 'relu' or variants.
+            Default: 'relu'.
+        bias (float, optional): The value to initialize the bias. Default: 0.
+        distribution (str): The random distribution to use. Can be 'normal' or 'uniform'.
+            Default: 'normal'.
+    """
+    assert distribution in ['uniform', 'normal'], \
+        "Invalid distribution for kaiming initialization"
+
+    if distribution == 'uniform':
+        nn.init.kaiming_uniform_(module.weight, a=0, mode=mode, nonlinearity=nonlinearity)
+    else:
+        nn.init.kaiming_normal_(module.weight, a=0, mode=mode, nonlinearity=nonlinearity)
+
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)
 
 
 class LearningToDownsample(nn.Module):

@@ -1,4 +1,5 @@
-from mmcv.utils import Registry, build_from_cfg
+from mmengine.registry.registry import Registry
+from mmengine.registry.build_functions import build_from_cfg
 
 PIXEL_SAMPLERS = Registry('pixel sampler')
 

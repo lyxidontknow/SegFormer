@@ -2,13 +2,26 @@ from abc import ABCMeta, abstractmethod
 
 import torch
 import torch.nn as nn
-from mmcv.cnn import normal_init
-from mmcv.runner import auto_fp16, force_fp32
+from utils import auto_fp16, force_fp32
 
 from mmseg.core import build_pixel_sampler
 from mmseg.ops import resize
 from ..builder import build_loss
 from ..losses import accuracy
+
+
+def normal_init(module, mean=0, std=1, bias=0):
+    """Initialize the weight and bias of module with values drawn from a normal distribution.
+
+    Args:
+        module (nn.Module): The module to be initialized.
+        mean (float): Mean of the normal distribution. Default: 0.
+        std (float): Standard deviation of the normal distribution. Default: 1.
+        bias (float, optional): The value to initialize the bias. Default: 0.
+    """
+    nn.init.normal_(module.weight, mean, std)
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)
 
 
 class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
@@ -163,7 +176,7 @@ class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
 
         return inputs
 
-    @auto_fp16()
+    # @auto_fp16()
     @abstractmethod
     def forward(self, inputs):
         """Placeholder of forward function."""
@@ -213,7 +226,7 @@ class BaseDecodeHead(nn.Module, metaclass=ABCMeta):
         output = self.conv_seg(feat)
         return output
 
-    @force_fp32(apply_to=('seg_logit', ))
+    # @force_fp32(apply_to=('seg_logit', ))
     def losses(self, seg_logit, seg_label):
         """Compute segmentation loss."""
         loss = dict()

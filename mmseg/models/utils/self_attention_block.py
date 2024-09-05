@@ -1,7 +1,19 @@
 import torch
-from mmcv.cnn import ConvModule, constant_init
+from mmcv.cnn import ConvModule
 from torch import nn as nn
 from torch.nn import functional as F
+
+def constant_init(module, val, bias=0):
+    """Initialize the weight of module with constant values.
+
+    Args:
+        module (nn.Module): The module to be initialized.
+        val (float): The value to fill the weight.
+        bias (float, optional): The value to fill the bias. Default: 0.
+    """
+    nn.init.constant_(module.weight, val)
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)
 
 
 class SelfAttentionBlock(nn.Module):

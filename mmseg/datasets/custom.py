@@ -4,7 +4,7 @@ from functools import reduce
 
 import mmcv
 import numpy as np
-from mmcv.utils import print_log
+from utils.logging import print_log
 from terminaltables import AsciiTable
 from torch.utils.data import Dataset
 

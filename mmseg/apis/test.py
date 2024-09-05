@@ -8,7 +8,7 @@ import numpy as np
 import torch
 import torch.distributed as dist
 from mmcv.image import tensor2imgs
-from mmcv.runner import get_dist_info
+from mmengine.dist.utils import get_dist_info
 from IPython import embed
 from mmseg.ops import resize
 

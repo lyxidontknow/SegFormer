@@ -4,11 +4,18 @@ import random
 from functools import partial
 
 import numpy as np
-from mmcv.parallel import collate
-from mmcv.runner import get_dist_info
-from mmcv.utils import Registry, build_from_cfg
-from mmcv.utils.parrots_wrapper import DataLoader, PoolDataLoader
+import torch
+from parallel import collate
+from mmengine.dist.utils import get_dist_info
+from mmengine.registry.registry import Registry
+from mmengine.registry.build_functions import build_from_cfg
 from torch.utils.data import DistributedSampler
+
+if torch.__version__ == 'parrots':
+    from torch.utils.data import DataLoader, PoolDataLoader
+else:
+    from torch.utils.data import DataLoader
+    PoolDataLoader = DataLoader
 
 if platform.system() != 'Windows':
     # https://github.com/pytorch/pytorch/issues/973

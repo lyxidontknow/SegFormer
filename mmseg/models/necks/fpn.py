@@ -1,8 +1,33 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from mmcv.cnn import ConvModule, xavier_init
+from mmcv.cnn import ConvModule
 
 from ..builder import NECKS
+
+import torch.nn as nn
+
+def xavier_init(module, gain=1, bias=0, distribution='normal'):
+    """Initialize the weight of module using Xavier initialization.
+
+    Args:
+        module (nn.Module): The module to be initialized.
+        gain (float): Scaling factor for the Xavier initialization. Default: 1.
+        bias (float, optional): The value to initialize the bias. Default: 0.
+        distribution (str): Either 'uniform' or 'normal'. Default: 'normal'.
+
+    Returns:
+        None: Initializes the weights and bias in place.
+    """
+    assert distribution in ['uniform', 'normal'], \
+        "distribution must be either 'uniform' or 'normal'"
+
+    if distribution == 'uniform':
+        nn.init.xavier_uniform_(module.weight, gain=gain)
+    else:
+        nn.init.xavier_normal_(module.weight, gain=gain)
+
+    if hasattr(module, 'bias') and module.bias is not None:
+        nn.init.constant_(module.bias, bias)
 
 
 @NECKS.register_module()

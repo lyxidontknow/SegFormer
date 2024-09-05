@@ -1,3 +1,11 @@
 -r requirements/optional.txt
 -r requirements/runtime.txt
 -r requirements/tests.txt
+
+torch~=2.1.0
+ipython~=8.12.3
+attrs~=23.2.0
+pillow~=10.2.0
+opencv-python~=4.9.0.80
+scipy~=1.11.4
+setuptools~=70.3.0
